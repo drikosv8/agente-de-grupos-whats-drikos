@@ -99,6 +99,12 @@ Faça login com as credenciais do `.env`
 ## 🗃️ Estrutura do Banco de Dados (MySQL)
 
 ```sql
+CREATE DATABASE IF NOT EXISTS `agente_ia_grupo`
+  DEFAULT CHARACTER SET utf8mb4
+  COLLATE utf8mb4_0900_ai_ci;
+
+USE `agente_ia_grupo`;
+
 CREATE TABLE grupos_config (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome_grupo VARCHAR(255),
