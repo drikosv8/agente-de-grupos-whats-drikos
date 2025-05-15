@@ -1,7 +1,15 @@
 {% extends "layout.twig" %}
 {% block content %}
 <h3 class="mb-4"><i class="bi bi-gear-fill me-2"></i>{% if grupo.id %}Editar{% else %}Novo{% endif %} Grupo</h3>
-<form method="POST" action="/salvar" class="row g-3 needs-validation" novalidate>
+<div id="alerta-validacao"
+     class="alert alert-danger py-2 px-4 text-center d-none small"
+     role="alert"
+     style="max-width: fit-content; margin: auto;">
+  ⚠️ Preencha todos os campos obrigatórios para continuar.
+</div>
+
+<form id="formulario-grupo" method="POST" action="/salvar" class="row g-3 needs-validation" novalidate>
+
   <input type="hidden" name="id" value="{{ grupo.id }}">
 <div class="row g-3">
 <div class="col-md-4 form-floating">
@@ -54,12 +62,12 @@
 </div>
 
 <div class="col-12 form-floating">
-  <textarea name="comportamento" id="comportamento" class="form-control">{{ grupo.comportamento }}</textarea>
+  <textarea name="comportamento" id="comportamento" class="form-control" required>{{ grupo.comportamento }}</textarea>
   <label for="comportamento"><i class="bi bi-chat-text-fill me-2"></i>Comportamento da IA</label>
 </div>
 
 <div class="col-12 form-floating">
-  <textarea name="openai_api_key" id="chave" class="form-control"
+  <textarea name="openai_api_key" id="chave" class="form-control" required
     style="height: 5.8rem !important; min-height: 0 !important; line-height: 1.1rem; overflow-wrap: break-word; resize: none;">
     {{ grupo.openai_api_key }}
   </textarea>
@@ -76,6 +84,8 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const selectNome = document.getElementById('nome_grupo');
   const campoId = document.getElementById('id_grupo_whatsapp');
+  const alerta = document.getElementById('alerta-validacao');
+  const formulario = document.getElementById('formulario-grupo');
 
   try {
     const response = await fetch('/api/grupos-disponiveis');
@@ -87,30 +97,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Preenche o select com os nomes
     selectNome.innerHTML = grupos.map(g =>
       `<option value="${g.nome}" ${g.nome === "{{ grupo.nome_grupo }}" ? 'selected' : ''}>${g.nome}</option>`
     ).join('');
 
-    // Lógica para preencher o ID do grupo já relacionado
     let grupoSelecionado = null;
-
-    // Se estiver editando e grupo salvo for encontrado
     const nomeAtual = "{{ grupo.nome_grupo }}";
     if (nomeAtual) {
       grupoSelecionado = grupos.find(g => g.nome === nomeAtual);
     }
-
-    // Se for novo cadastro ou nome não encontrado, usa o primeiro da lista
     if (!grupoSelecionado) {
       grupoSelecionado = grupos[0];
       selectNome.value = grupoSelecionado.nome;
     }
 
-    // Preenche o ID
     campoId.value = grupoSelecionado.id;
 
-    // Atualiza o ID ao mudar o nome
     selectNome.addEventListener('change', () => {
       const selecionado = grupos.find(g => g.nome === selectNome.value);
       campoId.value = selecionado ? selecionado.id : '';
@@ -121,9 +123,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectNome.innerHTML = `<option value="">Erro ao carregar grupos</option>`;
     campoId.value = '';
   }
+
+  // Validação completa
+  formulario.addEventListener('submit', (e) => {
+    const camposObrigatorios = formulario.querySelectorAll('[required]');
+    let formularioValido = true;
+
+    camposObrigatorios.forEach(campo => {
+      if (!campo.value || campo.value.trim() === '') {
+        formularioValido = false;
+      }
+    });
+
+    if (!formularioValido) {
+      e.preventDefault();
+      alerta.classList.remove('d-none');
+      alerta.scrollIntoView({ behavior: 'smooth' });
+
+      // Esconde após 2 segundos
+      setTimeout(() => {
+        alerta.classList.add('d-none');
+      }, 2000);
+    } else {
+      alerta.classList.add('d-none');
+    }
+  });
 });
 </script>
-
-
 
 {% endblock %}
