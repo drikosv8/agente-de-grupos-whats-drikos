@@ -1,0 +1,129 @@
+{% extends "layout.twig" %}
+{% block content %}
+<h3 class="mb-4"><i class="bi bi-gear-fill me-2"></i>{% if grupo.id %}Editar{% else %}Novo{% endif %} Grupo</h3>
+<form method="POST" action="/salvar" class="row g-3 needs-validation" novalidate>
+  <input type="hidden" name="id" value="{{ grupo.id }}">
+<div class="row g-3">
+<div class="col-md-4 form-floating">
+  <select name="nome_grupo" id="nome_grupo" class="form-select" required>
+    <option value="">Carregando grupos...</option>
+  </select>
+  <label for="nome_grupo"><i class="bi bi-type me-2"></i>Nome do Grupo</label>
+</div>
+
+
+  <div class="col-md-4 form-floating">
+    <input type="text" name="nome_bot" id="nome_bot" value="{{ grupo.nome_bot ?? '' }}" class="form-control" required>
+    <label for="nome_bot"><i class="bi bi-robot me-2"></i>Nome do Agente</label>
+  </div>
+
+<div class="col-md-4 form-floating">
+  <input type="text" name="id_grupo_whatsapp" id="id_grupo_whatsapp" value="{{ grupo.id_grupo_whatsapp }}" class="form-control" readonly>
+  <label for="id_grupo_whatsapp"><i class="bi bi-whatsapp me-2"></i>ID do Grupo WhatsApp</label>
+</div>
+
+
+<div class="col-md-4 form-floating">
+  <select name="fuso_horario" class="form-select" id="fuso">
+    {% for fuso in [
+      'America/Sao_Paulo', 'America/Argentina/Buenos_Aires', 'America/New_York', 'Europe/Lisbon',
+      'Europe/London', 'UTC', 'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Dubai', 'Australia/Sydney'
+    ] %}
+      <option value="{{ fuso }}" {% if grupo.fuso_horario == fuso %}selected{% endif %}>{{ fuso }}</option>
+    {% endfor %}
+  </select>
+  <label for="fuso"><i class="bi bi-globe me-2"></i>Fuso Horário</label>
+</div>
+
+<div class="col-md-4 form-floating">
+  <select name="voz_ai" class="form-select" id="voz">
+    {% for voz in ['alloy', 'ash', 'coral', 'echo', 'fable', 'onyx', 'nova', 'sage', 'shimmer'] %}
+      <option value="{{ voz }}" {% if grupo.voz_ai == voz %}selected{% endif %}>{{ voz }}</option>
+    {% endfor %}
+  </select>
+  <label for="voz"><i class="bi bi-mic-fill me-2"></i>Voz da IA</label>
+</div>
+
+<div class="col-md-4 form-floating">
+  <select name="modelo_ai" class="form-select" id="modelo">
+    {% for modelo in ['gpt-4', 'gpt-4-1106-preview', 'gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-3.5-turbo-1106'] %}
+      <option value="{{ modelo }}" {% if grupo.modelo_ai == modelo %}selected{% endif %}>{{ modelo }}</option>
+    {% endfor %}
+  </select>
+  <label for="modelo"><i class="bi bi-cpu-fill me-2"></i>Modelo da IA</label>
+</div>
+
+<div class="col-12 form-floating">
+  <textarea name="comportamento" id="comportamento" class="form-control">{{ grupo.comportamento }}</textarea>
+  <label for="comportamento"><i class="bi bi-chat-text-fill me-2"></i>Comportamento da IA</label>
+</div>
+
+<div class="col-12 form-floating">
+  <textarea name="openai_api_key" id="chave" class="form-control"
+    style="height: 5.8rem !important; min-height: 0 !important; line-height: 1.1rem; overflow-wrap: break-word; resize: none;">
+    {{ grupo.openai_api_key }}
+  </textarea>
+  <label for="chave"><i class="bi bi-key-fill me-2"></i>Chave OpenAI</label>
+</div>
+
+<div class="col-12 d-flex justify-content-between">
+  <a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-circle"></i> Voltar</a>
+  <button type="submit" class="btn btn-success shadow-sm"><i class="bi bi-save-fill"></i> Salvar</button>
+</div>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const selectNome = document.getElementById('nome_grupo');
+  const campoId = document.getElementById('id_grupo_whatsapp');
+
+  try {
+    const response = await fetch('/api/grupos-disponiveis');
+    const grupos = await response.json();
+
+    if (!grupos.length) {
+      selectNome.innerHTML = `<option value="">Nenhum grupo encontrado</option>`;
+      campoId.value = '';
+      return;
+    }
+
+    // Preenche o select com os nomes
+    selectNome.innerHTML = grupos.map(g =>
+      `<option value="${g.nome}" ${g.nome === "{{ grupo.nome_grupo }}" ? 'selected' : ''}>${g.nome}</option>`
+    ).join('');
+
+    // Lógica para preencher o ID do grupo já relacionado
+    let grupoSelecionado = null;
+
+    // Se estiver editando e grupo salvo for encontrado
+    const nomeAtual = "{{ grupo.nome_grupo }}";
+    if (nomeAtual) {
+      grupoSelecionado = grupos.find(g => g.nome === nomeAtual);
+    }
+
+    // Se for novo cadastro ou nome não encontrado, usa o primeiro da lista
+    if (!grupoSelecionado) {
+      grupoSelecionado = grupos[0];
+      selectNome.value = grupoSelecionado.nome;
+    }
+
+    // Preenche o ID
+    campoId.value = grupoSelecionado.id;
+
+    // Atualiza o ID ao mudar o nome
+    selectNome.addEventListener('change', () => {
+      const selecionado = grupos.find(g => g.nome === selectNome.value);
+      campoId.value = selecionado ? selecionado.id : '';
+    });
+
+  } catch (err) {
+    console.error('Erro ao buscar grupos:', err);
+    selectNome.innerHTML = `<option value="">Erro ao carregar grupos</option>`;
+    campoId.value = '';
+  }
+});
+</script>
+
+
+
+{% endblock %}

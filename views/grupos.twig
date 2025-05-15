@@ -1,0 +1,74 @@
+{% extends "layout.twig" %}
+{% block content %}
+
+{% if erro == 'duplicado' %}
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.6);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Erro ao salvar</h5>
+      </div>
+      <div class="modal-body">
+        Já existe um grupo com esse <strong>ID do WhatsApp</strong> cadastrado.
+      </div>
+      <div class="modal-footer">
+        <a href="/" class="btn btn-danger">OK</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
+  <h2 class="fw-bold d-inline-flex align-items-center">
+    <i class="bi bi-people-fill me-2"></i> Grupos Cadastrados
+  </h2>
+  <div class="d-flex align-items-center">
+    <a href="/novo" class="btn btn-success shadow-sm d-flex align-items-center me-3">
+      <i class="bi bi-plus-lg me-1"></i> Novo Grupo
+    </a>
+    <button class="btn btn-sm btn-outline-light theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+      <i class="bi bi-circle-half"></i>
+    </button>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle shadow-sm rounded-3 overflow-hidden w-100">
+    <thead class="table-light text-dark">
+      <tr>
+        <th class="text-nowrap">Grupo</th>
+        <th class="text-nowrap">Fuso Horário</th>
+		<th class="text-nowrap">Nome do Agente</th>
+        <th class="text-nowrap">Voz IA</th>
+        <th class="text-nowrap">Modelo IA</th>
+        <th class="text-nowrap">Comportamento da IA</th>
+        <th class="text-nowrap">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for g in grupos %}
+      <tr>
+        <td class="text-nowrap"><i class="bi bi-chat-dots me-1"></i>{{ g.nome_grupo }}</td>
+        <td class="text-nowrap">{{ g.fuso_horario }}</td>
+		<td class="text-nowrap text-center">{{ g.nome_bot }}</td>
+        <td class="text-nowrap">{{ g.voz_ai }}</td>
+        <td class="text-nowrap">{{ g.modelo_ai }}</td>
+        <td style="white-space: normal;">{{ g.comportamento }}</td>
+        <td class="text-nowrap">
+          <a href="/novo?id={{ g.id }}" class="btn btn-sm btn-outline-info me-1"><i class="bi bi-pencil-square"></i></a>
+          <a href="#" onclick="confirmarExclusao('/excluir/{{ g.id }}')" class="btn btn-sm btn-outline-danger">
+		  <i class="bi bi-trash"></i>
+		</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<footer class="text-center mt-5 fixed-bottom pb-2 bg-transparent">
+  <p class="text-muted small mb-0">Feito com <span style="color:red">&hearts;</span> por Driko's v8</p>
+</footer>
+
+{% endblock %}
