@@ -173,14 +173,15 @@ By Driko's v8`;
     return;
   }
 
-  if (body.startsWith(`@${nomeDoBot}`)) {
-    const pergunta = msg.body.replace(`@${nomeDoBot}`, '').trim();
-    const contexto = await buscarContextoDoGrupoHoje(msg.from);
-    const resposta = await responderComOpenAI(pergunta, contexto, grupo.id_grupo_whatsapp);
-    await client.sendMessage(msg.from, resposta);
-    if (deveSalvarMensagem(msg, quoted, true)) await salvarMensagem({ from: msg.from, author: 'BOT', body: resposta });
-    return;
-  }
+if (isBotMentioned && msg.type === 'chat') {
+  const pergunta = msg.body.replace(`@${nomeDoBot}`, '').trim();
+  const contexto = await buscarContextoDoGrupoHoje(msg.from);
+  const resposta = await responderComOpenAI(pergunta, contexto, grupo.id_grupo_whatsapp);
+  await client.sendMessage(msg.from, resposta);
+  if (deveSalvarMensagem(msg, quoted, true)) await salvarMensagem({ from: msg.from, author: 'BOT', body: resposta });
+  return;
+}
+
 
   if (body.startsWith('/buscar ')) {
     const termo = msg.body.replace('/buscar', '').trim();
