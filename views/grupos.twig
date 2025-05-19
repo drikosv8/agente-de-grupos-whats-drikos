@@ -54,7 +54,7 @@
 		<td class="text-nowrap text-center">{{ g.nome_bot }}</td>
         <td class="text-nowrap">{{ g.voz_ai }}</td>
         <td class="text-nowrap">{{ g.modelo_ai }}</td>
-        <td style="white-space: normal;">{{ g.comportamento }}</td>
+        <td><div style="white-space: pre-line;">{{ g.comportamento }}</div></td>
         <td class="text-nowrap">
           <a href="/novo?id={{ g.id }}" class="btn btn-sm btn-outline-info me-1"><i class="bi bi-pencil-square"></i></a>
           <a href="#" onclick="confirmarExclusao('/excluir/{{ g.id }}')" class="btn btn-sm btn-outline-danger">
