@@ -1,0 +1,86 @@
+{% extends "layout.twig" %}
+{% block content %}
+
+<h3 class="mb-4"><i class="bi bi-plug me-2"></i>Integrações Emby</h3>
+
+<div class="d-flex justify-content-end mb-3">
+  <a href="/integracoes/emby/novo" class="btn btn-success shadow-sm d-flex align-items-center">
+    <i class="bi bi-plus-lg me-1"></i> Nova Integração
+  </a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle shadow-sm rounded overflow-hidden w-100">
+    <thead class="table-light text-dark">
+      <tr>
+        <th>Grupo</th>
+        <th>URL</th>
+        <th>Chave API</th>
+        <th>User ID</th>
+        <th>Criado em</th>
+        <th class="text-end">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in integracoes %}
+      <tr>
+        <td>{{ item.nome }}</td>
+        <td>{{ item.url }}</td>
+        <td><code>{{ item.api_key }}</code></td>
+        <td>{{ item.user_id }}</td>
+        <td>{{ item.criado_em|date("d/m/Y H:i") }}</td>
+        <td class="text-end">
+          <a href="/integracoes/emby/editar/{{ item.id }}" class="btn btn-sm btn-outline-primary me-1">
+            <i class="bi bi-pencil-square"></i>
+          </a>
+<button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmarExclusaoModal" data-id="{{ item.id }}">
+  <i class="bi bi-trash"></i>
+</button>
+
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="text-center text-muted py-4">Nenhuma integração cadastrada.</td>
+      </tr>
+      {% endfor %}  
+    </tbody>
+  </table>
+</div>
+<div class="col-12 d-flex justify-content-between">
+  <a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-circle"></i> Voltar</a>
+</div>
+
+
+<!-- Modal de confirmação -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-secondary">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Confirmar exclusão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja excluir esta integração Emby?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a id="btnConfirmarExclusao" href="#" class="btn btn-danger">Excluir</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  const modalExclusao = document.getElementById('confirmarExclusaoModal');
+  if (modalExclusao) {
+    modalExclusao.addEventListener('show.bs.modal', function (event) {
+      const botao = event.relatedTarget;
+      const id = botao.getAttribute('data-id');
+      const linkExcluir = modalExclusao.querySelector('#btnConfirmarExclusao');
+      linkExcluir.href = `/integracoes/emby/excluir/${id}`;
+    });
+  }
+</script>
+{% endblock %}
