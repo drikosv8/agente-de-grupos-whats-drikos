@@ -11,6 +11,8 @@ Você tambem poderá fazer pesquisar de paravras chaves de assuntos que rolou no
 
 Perguntou para o agente em texto, ele responde em texto, perguntou por audio, ele responde em audio e ainda faz interpretação de imagens. 
 
+Adicionado 20/05/2025 Integração com servidor emby, possibilitando a IA realizar consultas no banco de dados de suas mídias de filmes e séries.
+
 ---
 
 ## ✨ Funcionalidades
@@ -24,6 +26,8 @@ Perguntou para o agente em texto, ele responde em texto, perguntou por audio, el
 - 💻 Painel Web com login seguro e gerenciamento completo
 - 🔒 Acesso controlado apenas para grupos cadastrados
 - 🧾 Histórico por grupo salvo no banco de dados
+-  <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/Emby_Logo.svg" alt="Emby" width="20"/> Integração com servidor Emby
+Permite consultar filmes, séries diretamente via WhatsApp, integrando com múltiplos servidores Emby configuráveis.
 
 ---
 
@@ -35,6 +39,8 @@ Perguntou para o agente em texto, ele responde em texto, perguntou por audio, el
 /resumo hoje
 /resumo ontem
 /resumo semana
+/filme titulo
+/serie titulo
 ```
 Use o @nome_do_agente para interagir, ou responda encima da resposta do agente.
 
@@ -124,6 +130,16 @@ CREATE TABLE mensagens (
   autor VARCHAR(255),
   mensagem TEXT,
   data DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE integracoes_emby (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  grupo_id VARCHAR(100) NOT NULL,
+  nome VARCHAR(100),
+  url TEXT NOT NULL,
+  api_key TEXT NOT NULL,
+  user_id VARCHAR(100) NOT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
