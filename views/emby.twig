@@ -1,0 +1,68 @@
+{% extends "layout.twig" %}
+{% block content %}
+
+{% if erro == 'duplicado' %}
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.6);">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Erro ao salvar</h5>
+      </div>
+      <div class="modal-body">
+        Já existe uma integração cadastrada para esse <strong>grupo</strong>.
+      </div>
+      <div class="modal-footer">
+        <a href="/integracoes/emby/novo" class="btn btn-danger">OK</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<h3 class="mb-4">
+  <i class="bi bi-plug me-2"></i>
+  {{ integracao ? 'Editar Integração Emby' : 'Nova Integração Emby' }}
+</h3>
+
+<form method="POST" action="{{ integracao ? '/atualizar-integracao-emby/' ~ integracao.id : '/salvar-integracao-emby' }}" class="row g-3">
+
+  <div class="col-md-6 form-floating">
+    <select name="grupo_id" id="grupo_id" class="form-select" {{ integracao ? 'disabled' : '' }} required>
+      <option value="">Selecione o grupo</option>
+      {% for grupo in grupos %}
+        <option value="{{ grupo.id_grupo_whatsapp }}"
+          {{ integracao and integracao.grupo_id == grupo.id_grupo_whatsapp ? 'selected' : '' }}>
+          {{ grupo.nome_grupo }}
+        </option>
+      {% endfor %}
+    </select>
+    <label for="grupo_id"><i class="bi bi-people-fill me-2"></i>Nome do Grupo</label>
+  </div>
+
+  <div class="col-md-6 form-floating">
+    <input type="text" name="url" class="form-control" placeholder="https://seu-servidor-emby" required
+      value="{{ integracao ? integracao.url : '' }}">
+    <label><i class="bi bi-link-45deg me-2"></i>URL do Servidor Emby</label>
+  </div>
+
+  <div class="col-md-6 form-floating">
+    <input type="text" name="api_key" class="form-control" placeholder="Chave API" required
+      value="{{ integracao ? integracao.api_key : '' }}">
+    <label><i class="bi bi-key-fill me-2"></i>Chave API</label>
+  </div>
+
+  <div class="col-md-6 form-floating">
+    <input type="text" name="user_id" class="form-control" placeholder="ID do Usuário Emby" required
+      value="{{ integracao ? integracao.user_id : '' }}">
+    <label><i class="bi bi-person-badge-fill me-2"></i>ID do Usuário Emby</label>
+  </div>
+
+  <div class="col-12 d-flex justify-content-between">
+    <a href="/integracoes/emby" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-circle"></i> Voltar</a>
+    <button type="submit" class="btn btn-success shadow-sm">
+      <i class="bi bi-save-fill"></i> {{ integracao ? 'Salvar Alterações' : 'Salvar Integração' }}
+    </button>
+  </div>
+</form>
+
+{% endblock %}
