@@ -40,3 +40,18 @@ CREATE TABLE `mensagens` (
   `data` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=493 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- --------------------------------------------------------
+-- Tabela: integracoes_emby
+-- --------------------------------------------------------
+
+CREATE TABLE integracoes_emby (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  grupo_id VARCHAR(100) NOT NULL,
+  nome VARCHAR(100),
+  url TEXT NOT NULL,
+  api_key TEXT NOT NULL,
+  user_id VARCHAR(100) NOT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
