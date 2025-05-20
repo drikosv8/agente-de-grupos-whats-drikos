@@ -13,13 +13,28 @@ const connection = mysql.createPool({
 });
 
 async function salvarMensagem(msg) {
-  const autor = msg.author || msg.from || 'BOT';
-  const corpo = msg.body || msg.mensagem || '[vazio]';
   const grupo = msg.from || msg.grupo || msg.to || 'BOT';
+  const corpo = msg.body || msg.mensagem || '[vazio]';
+  const isGrupo = grupo.endsWith('@g.us');
+
+  let autor = msg.author || msg.from || 'BOT';
+  let nomeContato = autor;
+
+  if (isGrupo && msg.author) {
+    try {
+      const contato = await msg.getContact();
+      nomeContato = contato.pushname || contato.name || autor.split('@')[0];
+    } catch (e) {}
+  } else if (!isGrupo) {
+    try {
+      const contato = await msg.getContact();
+      nomeContato = contato.pushname || contato.name || autor.split('@')[0];
+    } catch (e) {}
+  }
 
   await connection.execute(
     'INSERT INTO mensagens (grupo, autor, mensagem) VALUES (?, ?, ?)',
-    [grupo, autor, corpo]
+    [grupo, nomeContato, corpo]
   );
 }
 
@@ -32,7 +47,10 @@ async function buscarContextoDoGrupoHoje(grupo) {
      ORDER BY data ASC`,
     [grupo, hoje]
   );
-  return rows.map(r => `📅 ${moment(r.data).format('HH:mm')} - 👤 ${r.autor}: ${r.mensagem}`).join('\n');
+
+  return rows.map(r =>
+    `📅 ${moment(r.data).format('HH:mm')} - 👤 ${r.autor}: ${r.mensagem}`
+  ).join('\n');
 }
 
 async function buscarResumoDoDia(grupo, dataReferencia) {
@@ -44,7 +62,8 @@ async function buscarResumoDoDia(grupo, dataReferencia) {
      ORDER BY data ASC`,
     [grupo, dataFormatada]
   );
-  return rows.map(r => `- ${r.autor}: ${r.mensagem}`).join('\n');
+
+  return rows.map(r => `- *${r.autor}:* ${r.mensagem}`).join('\n');
 }
 
 async function buscarPorTermoNoBanco(grupo, termo) {
@@ -59,14 +78,9 @@ async function buscarPorTermoNoBanco(grupo, termo) {
     [grupo, termoLike]
   );
 
-  console.log(`[DEBUG] /buscar encontrou ${rows.length} resultados para: "${termo}"`);
-  if (!rows.length) return null;
-
-  return rows.map(r => {
-    const data = moment(r.data).format('DD/MM - HH:mm');
-    const autor = r.autor.replace('@c.us', '');
-    return `👤 ${autor} (${data}):\n"${r.mensagem}"`;
-  }).join('\n\n');
+  return rows.map(r =>
+    `👤 ${r.autor} (${moment(r.data).format('DD/MM - HH:mm')}):\n"${r.mensagem}"`
+  ).join('\n\n');
 }
 
 async function buscarResumo30Dias(grupo, termo) {
@@ -93,11 +107,20 @@ async function buscarConfiguracaoDoGrupo(idGrupoWhatsapp) {
   return rows[0] || null;
 }
 
+async function buscarIntegracaoEmbyPorGrupo(grupo_id) {
+  const [rows] = await connection.execute(
+    'SELECT * FROM integracoes_emby WHERE grupo_id = ? LIMIT 1',
+    [grupo_id]
+  );
+  return rows[0] || null;
+}
+
 module.exports = {
   salvarMensagem,
   buscarContextoDoGrupoHoje,
   buscarResumoDoDia,
   buscarPorTermoNoBanco,
   buscarResumo30Dias,
-  buscarConfiguracaoDoGrupo // ✅ ESSENCIAL para funcionar no index.js
+  buscarConfiguracaoDoGrupo,
+  buscarIntegracaoEmbyPorGrupo
 };
