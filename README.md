@@ -26,7 +26,7 @@ Adicionado 20/05/2025 Integração com servidor emby, possibilitando a IA realiz
 - 💻 Painel Web com login seguro e gerenciamento completo
 - 🔒 Acesso controlado apenas para grupos cadastrados
 - 🧾 Histórico por grupo salvo no banco de dados
-- 📺 Integração com servidor Emby,
+- 📺 Integração com servidor Emby.
   Permite consultar filmes, séries diretamente via WhatsApp, integrando com múltiplos servidores Emby configuráveis.
 
 ---
