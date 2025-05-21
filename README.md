@@ -6,8 +6,8 @@ Cada grupo possui **comportamento isolado**, com chave de API, voz e modelo dist
 Tenha um único número de Agente Robô em varios grupos do WhatsApp com personalidades e contextos diferentes, envios e recebimentos de mensagens de texto, em audio, e leitura de imagem.
 
 Um assistente pessoal para o grupo whtatsapp.
-Você poderá pedir o resumo de assunto que rolou no grupo ontem, hoje e na última semana, alem de pedir para o robô responder perguntas por mensagem e audio e ler imagens.
-Você tambem poderá fazer pesquisas de paravras chaves de assuntos que rolou no grupo e resgatar a consversa relacionada, mesmo que já tenha sido apagada do grupo. 
+Você poderá pedir o resumo de assuntos que rolaram no grupo ontem, hoje e na última semana, alem de pedir para o robô responder perguntas por mensagem e audio e ler imagens.
+Você tambem poderá fazer pesquisas de paravras chaves de assuntos que rolaram no grupo e resgatar a conversa relacionada, mesmo que já tenha sido apagada do grupo. 
 
 Perguntou para o agente em texto, ele responde em texto, perguntou por audio, ele responde em audio e ainda faz interpretação de imagens. 
 
