@@ -1,0 +1,105 @@
+{% extends "layout.twig" %}
+{% block content %}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
+  <h2 class="fw-bold d-inline-flex align-items-center">
+    <i class="bi bi-kanban me-2"></i> Fontes de Dados Externas – {{ grupo.nome_grupo }}
+  </h2>
+  <div>
+    <a href="/" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left-circle"></i> Voltar</a>
+<a href="/grupos/{{ grupo.id }}/fontes/novo" class="btn btn-success">
+  <i class="bi bi-plus-circle"></i> Nova Fonte
+</a>
+
+  </div>
+</div>
+
+{% if fontes|length > 0 %}
+<div class="table-responsive">
+  <table class="table table-striped align-middle shadow-sm rounded overflow-hidden w-100">
+    <thead class="table-light text-dark text-center"> <!-- 🔹 centraliza títulos -->
+      <tr>
+        <th>Descrição</th>
+        <th>Banco</th>
+        <th>Tabela</th>
+        <th>Colunas</th>
+        <th>Instruções</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in fontes %}
+      <tr data-id="{{ f.id }}">
+        <td class="align-middle text-center">{{ f.descricao }}</td>
+        <td class="align-middle text-center">{{ f.tipo|capitalize }}</td>
+        <td class="align-middle text-center">{{ f.tabela }}</td>
+        <td class="align-middle text-center">{{ f.colunas }}</td>
+        <td class="align-middle text-center">
+          <div class="instrucoes-preview"
+               data-bs-toggle="tooltip"
+               data-bs-placement="right"
+               data-bs-html="true"
+               title="{{ f.instrucoes_ativacao|e }}">
+            {{ f.instrucoes_ativacao }}
+          </div>
+        </td>
+        <td class="align-middle text-center">
+          <div class="d-inline-flex gap-2"> <!-- 🔹 sempre lado a lado -->
+            <!-- Status -->
+            <form method="POST" action="/grupos/{{ grupo.id }}/fontes/toggle" class="m-0">
+              <input type="hidden" name="id" value="{{ f.id }}">
+              <button type="submit" class="btn btn-sm {{ f.habilitado ? 'btn-success' : 'btn-secondary' }}">
+                {{ f.habilitado ? 'Ativada' : 'Desativada' }}
+              </button>
+            </form>
+            <!-- Editar -->
+<a href="/grupos/{{ grupo.id }}/fontes/editar/{{ f.id }}" class="btn btn-sm btn-outline-info">
+  <i class="bi bi-pencil"></i>
+</a>
+
+            <!-- Excluir -->
+<button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmarExclusaoFonte('{{ f.id }}')">
+  <i class="bi bi-trash"></i>
+</button>
+
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="text-muted">Nenhuma fonte cadastrada ainda.</p>
+{% endif %}
+
+<!-- Área dinâmica para formulário -->
+<div id="formularioFonte"></div>
+
+<!-- Modal de exclusão -->
+<div class="modal fade" id="modalConfirmar" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle me-2"></i> Confirmar Exclusão
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">Tem certeza que deseja excluir esta fonte?</div>
+      <div class="modal-footer">
+        <form id="formExcluirFonte" method="POST" action="/grupos/{{ grupo.id }}/fontes/excluir">
+          <input type="hidden" name="id" id="idExcluir">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mensagens de feedback -->
+<div id="mensagem-box" class="alert d-none position-fixed top-0 end-0 m-3"></div>
+
+
+{% endblock %}

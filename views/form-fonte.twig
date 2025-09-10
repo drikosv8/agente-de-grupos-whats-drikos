@@ -1,0 +1,241 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+  <h3 class="mb-4">
+    <i class="bi bi-database me-2"></i>
+    {{ fonte ? 'Editar Fonte de Dados' : 'Nova Fonte de Dados' }}
+  </h3>
+
+  <form 
+    method="POST" 
+    action="{{ fonte ? '/grupos/' ~ grupo.id ~ '/fontes/atualizar/' ~ fonte.id : '/grupos/' ~ grupo.id ~ '/fontes/salvar' }}" 
+    class="row g-3 needs-validation" 
+    novalidate 
+    autocomplete="off"
+  >
+    <input type="hidden" name="grupo_id" value="{{ grupo.id|default(fonte.grupo_id)|default('') }}">
+    <input type="hidden" name="id" value="{{ fonte.id|default('') }}">
+
+    <!-- Tipo e Descrição -->
+    <div class="row g-3">
+      <div class="col-md-4 form-floating">
+        <select name="tipo" class="form-select" required onchange="aplicarPadrao(this.value)">
+          <option value="">Selecione...</option>
+          <option value="mysql" {% if fonte and fonte.tipo == 'mysql' %}selected{% endif %}>MySQL</option>
+          <option value="postgres" {% if fonte and fonte.tipo == 'postgres' %}selected{% endif %}>PostgreSQL</option>
+          <option value="mssql" {% if fonte and fonte.tipo == 'mssql' %}selected{% endif %}>SQL Server</option>
+        </select>
+        <label>Tipo de Banco</label>
+      </div>
+
+      <div class="col-md-8 form-floating">
+        <input 
+          type="text" 
+          name="descricao" 
+          class="form-control" 
+          placeholder="Descrição da Fonte" 
+          value="{{ fonte.descricao|default('') }}" 
+          required
+        >
+        <label>Descrição</label>
+      </div>
+    </div>
+
+    <!-- Conexão -->
+    <div class="row g-3 mt-2">
+      <div class="col-md-4 form-floating">
+        <input 
+          type="text" 
+          name="conexao[host]" 
+          class="form-control" 
+          placeholder="Host" 
+          value="{{ conexao.host|default('') }}" 
+          required
+        >
+        <label>Host</label>
+      </div>
+
+      <div class="col-md-2 form-floating">
+        <input 
+          type="text" 
+          name="conexao[port]" 
+          class="form-control" 
+          placeholder="Porta" 
+          value="{{ conexao.port|default('') }}"
+          required
+        >
+        <label>Porta</label>
+      </div>
+
+      <div class="col-md-3 form-floating">
+        <input 
+          type="text" 
+          name="conexao[user]" 
+          class="form-control" 
+          placeholder="Usuário" 
+          value="{{ conexao.user|default('') }}"
+          required
+        >
+        <label>Usuário</label>
+      </div>
+
+      <div class="col-md-3 form-floating">
+        <input 
+          type="password" 
+          name="conexao[password]" 
+          class="form-control" 
+          placeholder="Senha" 
+          value="{{ conexao.password|default('') }}" 
+          autocomplete="new-password"
+          required
+        >
+        <label>Senha</label>
+      </div>
+
+      <div class="col-md-6 form-floating">
+        <input 
+          type="text" 
+          name="conexao[database]" 
+          class="form-control" 
+          placeholder="Database" 
+          value="{{ conexao.database|default('') }}"
+          required
+        >
+        <label>Database</label>
+      </div>
+    </div>
+
+    <!-- Configuração de dados -->
+    <div class="row g-3 mt-2">
+      <div class="col-md-6 form-floating">
+        <input 
+          type="text" 
+          name="tabela" 
+          class="form-control" 
+          placeholder="Tabela" 
+          value="{{ fonte.tabela|default('') }}" 
+          required
+        >
+        <label>Tabela / View</label>
+      </div>
+
+      <div class="col-md-6 form-floating">
+        <input 
+          type="text" 
+          name="colunas" 
+          class="form-control" 
+          placeholder="Colunas" 
+          value="{{ fonte.colunas|default('') }}" 
+          required
+        >
+        <label>Colunas (separadas por vírgula)</label>
+      </div>
+    </div>
+
+    <!-- Instruções -->
+    <div class="col-12 form-floating mt-3">
+      <textarea 
+        name="instrucoes_ativacao" 
+        class="form-control" 
+        style="height: 200px"
+      >{{ fonte.instrucoes_ativacao|default('') }}</textarea>
+      <label>Instruções de Ativação (opcional)</label>
+    </div>
+
+    <!-- Ações -->
+    <div class="col-12 d-flex justify-content-between mt-3">
+      <a href="/grupos/{{ grupo.id }}/fontes" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left-circle"></i> Voltar
+      </a>
+      <button type="submit" class="btn btn-success shadow-sm">
+        <i class="bi bi-save"></i>
+        {{ fonte ? 'Salvar Alterações' : 'Salvar Fonte' }}
+      </button>
+    </div>
+	
+<script>
+document.querySelector("form").addEventListener("submit", function(event) {
+  // lista de campos obrigatórios
+  const requiredFields = [
+    'select[name="tipo"]',
+    'input[name="descricao"]',
+    'input[name="conexao[host]"]',
+    'input[name="conexao[port]"]',
+    'input[name="conexao[user]"]',
+    'input[name="conexao[password]"]',
+    'input[name="conexao[database]"]',
+    'input[name="tabela"]',
+    'input[name="colunas"]'
+  ];
+
+  let firstInvalid = null;
+  for (const selector of requiredFields) {
+    const field = document.querySelector(selector);
+    if (field && !field.value.trim()) {
+      event.preventDefault(); // impede envio
+      field.classList.add("is-invalid"); // 🔴 borda vermelha
+      if (!firstInvalid) firstInvalid = field;
+    } else if (field) {
+      field.classList.remove("is-invalid");
+    }
+  }
+
+  if (firstInvalid) {
+    firstInvalid.focus(); // leva o usuário pro campo vazio
+
+    // Exibe modal de alerta
+    const modal = new bootstrap.Modal(document.getElementById("modalCampos"));
+    modal.show();
+  }
+});
+</script>
+
+<!-- Modal para alerta -->
+<div class="modal fade" id="modalCampos" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i> Atenção</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Todos os campos obrigatórios devem ser preenchidos.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ok</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </form>
+
+  <script>
+    function aplicarPadrao(tipo) {
+      const PADROES = {
+        mysql:   { host: 'localhost', port: '3306' },
+        postgres:{ host: 'localhost', port: '5432' },
+        mssql:   { host: 'localhost', port: '1433' }
+      };
+
+      const hostInput = document.querySelector('[name="conexao[host]"]');
+      const portInput = document.querySelector('[name="conexao[port]"]');
+      const dbInput   = document.querySelector('[name="conexao[database]"]');
+      const userInput = document.querySelector('[name="conexao[user]"]');
+      const passInput = document.querySelector('[name="conexao[password]"]');
+
+      if (!tipo || !PADROES[tipo]) {
+        hostInput.value = '';
+        portInput.value = '';
+        dbInput.value   = '';
+        userInput.value = '';
+        passInput.value = '';
+        return;
+      }
+
+      const { host, port } = PADROES[tipo];
+      hostInput.value = host;
+      portInput.value = port;
+    }
+  </script>
+{% endblock %}

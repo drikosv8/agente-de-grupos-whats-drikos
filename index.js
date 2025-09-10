@@ -23,6 +23,74 @@ const {
   buscarIntegracaoEmbyPorGrupo
 } = require('./mysql');
 
+<<<<<<< HEAD
+=======
+// 🔹 Importa a função de consultas externas
+const { executarConsultas } = require('./controllers/conector-banco');
+
+const extenso = require('extenso'); // 👈 no topo
+
+// Converte número inteiro em texto por extenso em português
+function numeroPorExtenso(n) {
+  return extenso(n, { mode: 'number' });
+}
+
+// 🔊 Normaliza valores numéricos para fala
+function normalizarMoedaParaFala(texto) {
+  // 1) Trata valores com R$
+  texto = texto.replace(/R\$\s?([\d\.\,]+)/g, (match, valor) => {
+    const numero = parseFloat(valor.replace(/\./g, '').replace(',', '.'));
+    if (isNaN(numero)) return match;
+
+    const reais = Math.floor(numero);
+    const centavos = Math.round((numero - reais) * 100);
+
+    const extensoReais = numeroPorExtenso(reais);
+    let resultado = `${extensoReais} ${reais === 1 ? 'real' : 'reais'}`;
+    if (centavos > 0) {
+      const extensoCentavos = numeroPorExtenso(centavos);
+      resultado += ` e ${extensoCentavos} centavos`;
+    }
+    return resultado;
+  });
+
+  // 2) Trata números sem R$ → apenas por extenso
+  texto = texto.replace(/([\d\.\,]+)/g, (match, valor) => {
+    if (!valor) return match;
+
+    let valorNormalizado = valor;
+    if (valorNormalizado.includes(',') && valorNormalizado.includes('.')) {
+      // caso venha 118.835,3
+      valorNormalizado = valorNormalizado.replace(/\./g, '').replace(',', '.');
+    } else if (valorNormalizado.includes(',')) {
+      valorNormalizado = valorNormalizado.replace(',', '.');
+    }
+
+    const numero = parseFloat(valorNormalizado);
+    if (isNaN(numero)) return match;
+
+    const inteiro = Math.floor(numero);
+    const decimais = Math.round((numero - inteiro) * 100);
+
+    let resultado = numeroPorExtenso(inteiro);
+    if (decimais > 0) {
+      resultado += ` vírgula ${numeroPorExtenso(decimais)}`;
+    }
+
+    return resultado;
+  });
+
+  return texto;
+}
+
+
+
+
+
+
+
+
+>>>>>>> 90e442b (Novidade e melhorias)
 const app = express();
 
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -41,8 +109,24 @@ app.use((req, res, next) => {
   if (req.path === '/login' || req.session.user) return next();
   return res.redirect('/login');
 });
+<<<<<<< HEAD
 app.use('/', gruposRoutes);
 
+=======
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// 🔹 multer precisa estar aqui
+const multer = require('multer');
+const upload = multer();
+app.use(upload.none());
+
+// 🔹 rotas depois
+app.use('/', gruposRoutes);
+
+
+
+>>>>>>> 90e442b (Novidade e melhorias)
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: { args: ['--no-sandbox'], headless: true }
@@ -101,6 +185,13 @@ client.on('message', async msg => {
   const grupo = await buscarConfiguracaoDoGrupo(msg.from);
   if (!grupo) return;
 
+<<<<<<< HEAD
+=======
+if (msg.from === 'status@broadcast') {
+  return; // ignora mensagens de status do WhatsApp
+}
+
+>>>>>>> 90e442b (Novidade e melhorias)
 
   const timeZone = grupo.fuso_horario || 'America/Sao_Paulo';
   const nomeDoBot = grupo.nome_bot?.toLowerCase();
@@ -127,6 +218,7 @@ client.on('message', async msg => {
     return;
   }
 
+<<<<<<< HEAD
   if (msg.hasMedia && (msg.type === 'audio' || msg.type === 'ptt')) {
     const media = await msg.downloadMedia();
     if (!media?.data) return;
@@ -151,6 +243,71 @@ await salvarMensagem({ from: msg.from, author: nomeAutor, body: transcricao });
     }
     return;
   }
+=======
+if (msg.hasMedia && (msg.type === 'audio' || msg.type === 'ptt')) {
+  const media = await msg.downloadMedia();
+  if (!media?.data) return;
+  const filePath = path.join(__dirname, 'audio.ogg');
+  fs.writeFileSync(filePath, Buffer.from(media.data, 'base64'));
+  const transcricao = await transcreverAudioComWhisper(filePath, grupo.id_grupo_whatsapp);
+  fs.unlinkSync(filePath);
+
+  if (transcricao) {
+    const contato = await msg.getContact();
+    const nomeAutor = contato.pushname || contato.name || msg.author?.split('@')[0] || 'BOT';
+
+    // sempre salva a transcrição do usuário
+    await salvarMensagem({ from: msg.from, author: nomeAutor, body: transcricao });
+
+    if (isReplyToBot) {
+      console.log(`🎙️ [AUDIO-REPLY] Pergunta transcrita: "${transcricao}"`);
+
+      // 1. Executa consultas
+      const consultas = await executarConsultas(grupo.id, transcricao);
+
+      // 2. Contexto padrão
+      let contexto = await buscarContextoDoGrupoHoje(msg.from, client);
+
+      let usouFonte = false;
+      if (consultas && consultas.trim() !== '') {
+        console.log(`📊 Dados retornados das fontes (áudio):\n${consultas}`);
+        contexto += `\n\nDados disponíveis do grupo (${grupo.nome_grupo}):\n${consultas}`;
+        usouFonte = true;
+      }
+
+      // 3. IA gera resposta
+      let respostaTexto = await responderComOpenAI(transcricao, contexto, grupo.id_grupo_whatsapp);
+      console.log(`🤖 [IA-RESPOSTA TEXTO] ${respostaTexto}`);
+
+      // 🔊 Normaliza valores monetários para que a fala fique natural
+      const respostaNormalizada = normalizarMoedaParaFala(respostaTexto);
+      console.log(`🔊 [IA-RESPOSTA EXTENSO] ${respostaNormalizada}`);
+
+      // 4. Gera áudio TTS com o texto normalizado
+      const respostaAudio = await responderComOpenAITTS(respostaNormalizada, grupo.id_grupo_whatsapp);
+      console.log("📤 [TTS ENVIADO AO WHATSAPP] Áudio gerado com sucesso.");
+
+      // Cria objeto de mídia para enviar no WhatsApp
+      const audioMedia = new MessageMedia(
+        'audio/ogg; codecs=opus',
+        respostaAudio.toString('base64'),
+        'resposta.ogg'
+      );
+
+      // 5. Envia áudio
+      await msg.reply(audioMedia, undefined, { sendAudioAsVoice: true });
+
+      // 6. Só salva resposta se NÃO usou fonte
+      if (!usouFonte && deveSalvarMensagem(msg, quoted, true)) {
+        await salvarMensagem({ from: msg.from, author: 'BOT', body: respostaTexto });
+      }
+    }
+  }
+  return;
+}
+
+
+>>>>>>> 90e442b (Novidade e melhorias)
 
   // Só salva mensagens de texto normais
 if (msg.type === 'chat' && deveSalvarMensagem(msg, quoted)) {
@@ -158,6 +315,7 @@ if (msg.type === 'chat' && deveSalvarMensagem(msg, quoted)) {
 }
 
 
+<<<<<<< HEAD
   if (isReplyToBot && msg.type === 'chat') {
     const contexto = await buscarContextoDoGrupoHoje(msg.from, client);
     const resposta = await responderComOpenAI(msg.body, contexto, grupo.id_grupo_whatsapp);
@@ -168,6 +326,52 @@ if (msg.type === 'chat' && deveSalvarMensagem(msg, quoted)) {
 
   if (body === '/ajuda') {
     const ajuda = `🧠 *Comandos disponíveis:*
+=======
+if (isReplyToBot && msg.type === 'chat') {
+  console.log(`💬 [MENCIONADO - REPLY] Grupo: ${grupo.nome_grupo} (${msg.from})`);
+  console.log(`👤 Autor: ${msg.author || msg.from}`);
+  console.log(`📥 Pergunta: "${msg.body}"`);
+
+  // 1. Busca dados nas fontes do grupo
+  const consultas = await executarConsultas(grupo.id, msg.body);
+
+  // 2. Contexto padrão
+  let contexto = await buscarContextoDoGrupoHoje(msg.from, client);
+
+  let usouFonte = false;
+  if (consultas && consultas.trim() !== '') {
+    console.log(`📊 Dados retornados das fontes:\n${consultas}`);
+    contexto += `\n\nDados disponíveis do grupo (${grupo.nome_grupo}):\n${consultas}`;
+    usouFonte = true; // 🚫 marca que veio do banco
+  } else {
+    console.log(`ℹ️ Nenhuma fonte retornou dados para esta pergunta.`);
+  }
+
+  // 3. IA gera resposta
+  const resposta = await responderComOpenAI(msg.body, contexto, grupo.id_grupo_whatsapp);
+
+  console.log(`🤖 Resposta da IA: "${resposta}"`);
+
+  // 4. Envia
+  await msg.reply(resposta);
+
+  // 5. Só salva se NÃO usou fonte
+  if (!usouFonte && deveSalvarMensagem(msg, quoted, true)) {
+    await salvarMensagem({ from: msg.from, author: 'BOT', body: resposta });
+  }
+  return;
+}
+
+
+
+
+
+if (body === '/ajuda') {
+  // 🔎 Verifica se o grupo tem integração Emby
+  const integracaoEmby = await buscarIntegracaoEmbyPorGrupo(msg.from);
+
+  let ajuda = `🧠 *Comandos disponíveis:*
+>>>>>>> 90e442b (Novidade e melhorias)
 - *@${nomeDoBot}* sua pergunta → responder com IA (também funciona se responder o bot)
 
 - */buscar* termo → busca no histórico do grupo
@@ -176,6 +380,7 @@ if (msg.type === 'chat' && deveSalvarMensagem(msg, quoted)) {
 
 - *Envie áudio* → transcreve e responde
 
+<<<<<<< HEAD
 - *Envie imagem* → interpreta visualmente
 
 - */filme* titulo → busca no acervo de filmes
@@ -193,10 +398,69 @@ if (isBotMentioned && msg.type === 'chat') {
   const resposta = await responderComOpenAI(pergunta, contexto, grupo.id_grupo_whatsapp);
   await msg.reply(resposta);
   if (deveSalvarMensagem(msg, quoted, true)) await salvarMensagem({ from: msg.from, author: 'BOT', body: resposta });
+=======
+- *Envie imagem* → interpreta visualmente`;
+
+  // 🔹 Só adiciona comandos de Emby se houver integração
+  if (integracaoEmby) {
+    ajuda += `
+
+- */filme* titulo → busca no acervo de filmes
+- */serie* titulo → busca no acervo de séries`;
+  }
+
+  ajuda += `
+
+By Driko's v8`;
+
+  await msg.reply(ajuda);
+  return;
+}
+
+if (isBotMentioned && msg.type === 'chat') {
+  const pergunta = msg.body.replace(`@${nomeDoBot}`, '').trim();
+
+  console.log(`💬 [MENCIONADO - @] Grupo: ${grupo.nome_grupo} (${msg.from})`);
+  console.log(`👤 Autor: ${msg.author || msg.from}`);
+  console.log(`📥 Pergunta: "${pergunta}"`);
+
+  // 1. Busca dados nas fontes do grupo
+  const consultas = await executarConsultas(grupo.id, pergunta);
+
+  // 2. Contexto padrão
+  let contexto = await buscarContextoDoGrupoHoje(msg.from, client);
+
+  let usouFonte = false;
+  if (consultas && consultas.trim() !== '') {
+    console.log(`📊 Dados retornados das fontes:\n${consultas}`);
+    contexto += `\n\nDados disponíveis do grupo (${grupo.nome_grupo}):\n${consultas}`;
+    usouFonte = true; // 🚫 marca que veio do banco
+  } else {
+    console.log(`ℹ️ Nenhuma fonte retornou dados para esta pergunta.`);
+  }
+
+  // 3. IA gera resposta
+  const resposta = await responderComOpenAI(pergunta, contexto, grupo.id_grupo_whatsapp);
+
+  console.log(`🤖 Resposta da IA: "${resposta}"`);
+
+  // 4. Envia
+  await msg.reply(resposta);
+
+  // 5. Só salva se NÃO usou fonte
+  if (!usouFonte && deveSalvarMensagem(msg, quoted, true)) {
+    await salvarMensagem({ from: msg.from, author: 'BOT', body: resposta });
+  }
+>>>>>>> 90e442b (Novidade e melhorias)
   return;
 }
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 90e442b (Novidade e melhorias)
   if (body.startsWith('/buscar ')) {
     const termo = msg.body.replace('/buscar', '').trim();
     const resultado = await buscarPorTermoNoBanco(msg.from, termo, client);

@@ -24,6 +24,7 @@
     <i class="bi bi-people-fill me-2"></i> Grupos Cadastrados
   </h2>
   <div class="d-flex align-items-center">
+<<<<<<< HEAD
 <div class="dropdown me-2">
   <button class="btn btn-outline-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
     <i class="bi bi-gear-fill me-1"></i> Integrações
@@ -39,16 +40,43 @@
     <button class="btn btn-sm btn-outline-light theme-toggle" onclick="toggleTheme()" title="Alternar tema">
       <i class="bi bi-circle-half"></i>
     </button>
+=======
+
+    <!-- Dropdown Integrações -->
+    <div class="dropdown me-2">
+      <button class="btn btn-outline-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        <i class="bi bi-gear-fill me-1"></i> Integrações
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="/integracoes/emby"><i class="bi bi-hdd-network me-2"></i>Emby</a></li>
+      </ul>
+    </div>
+
+    <!-- Botão Novo Grupo -->
+    <a href="/novo" class="btn btn-success shadow-sm d-flex align-items-center me-3">
+      <i class="bi bi-plus-lg me-1"></i> Novo Grupo
+    </a>
+
+
+>>>>>>> 90e442b (Novidade e melhorias)
   </div>
 </div>
 
 <div class="table-responsive">
+<<<<<<< HEAD
   <table class="table table-striped align-middle shadow-sm rounded-3 overflow-hidden w-100">
+=======
+  <table class="table table-striped align-middle shadow-sm rounded-3 overflow-hidden w-100 text-center">
+>>>>>>> 90e442b (Novidade e melhorias)
     <thead class="table-light text-dark">
       <tr>
         <th class="text-nowrap">Grupo</th>
         <th class="text-nowrap">Fuso Horário</th>
+<<<<<<< HEAD
 		<th class="text-nowrap">Nome do Agente</th>
+=======
+        <th class="text-nowrap">Nome do Agente</th>
+>>>>>>> 90e442b (Novidade e melhorias)
         <th class="text-nowrap">Voz IA</th>
         <th class="text-nowrap">Modelo IA</th>
         <th class="text-nowrap">Comportamento da IA</th>
@@ -60,6 +88,7 @@
       <tr>
         <td class="text-nowrap"><i class="bi bi-chat-dots me-1"></i>{{ g.nome_grupo }}</td>
         <td class="text-nowrap">{{ g.fuso_horario }}</td>
+<<<<<<< HEAD
 		<td class="text-nowrap text-center">{{ g.nome_bot }}</td>
         <td class="text-nowrap">{{ g.voz_ai }}</td>
         <td class="text-nowrap">{{ g.modelo_ai }}</td>
@@ -69,6 +98,29 @@
           <a href="#" onclick="confirmarExclusao('/excluir/{{ g.id }}')" class="btn btn-sm btn-outline-danger">
 		  <i class="bi bi-trash"></i>
 		</a>
+=======
+        <td class="text-nowrap">{{ g.nome_bot }}</td>
+        <td class="text-nowrap">{{ g.voz_ai }}</td>
+        <td class="text-nowrap">{{ g.modelo_ai }}</td>
+        <td>
+          <div class="comportamento-preview">
+            {{ g.comportamento }}
+          </div>
+        </td>
+        <td class="text-nowrap">
+          <!-- Botão Fontes -->
+          <a href="/grupos/{{ g.id }}/fontes" class="btn btn-sm btn-outline-success me-1">
+            <i class="bi bi-kanban"></i> Fontes
+          </a>
+          <!-- Botão Editar -->
+          <a href="/novo?id={{ g.id }}" class="btn btn-sm btn-outline-info me-1">
+            <i class="bi bi-pencil-square"></i>
+          </a>
+          <!-- Botão Excluir -->
+          <a href="#" onclick="confirmarExclusao('/excluir/{{ g.id }}')" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-trash"></i>
+          </a>
+>>>>>>> 90e442b (Novidade e melhorias)
         </td>
       </tr>
       {% endfor %}

@@ -67,6 +67,7 @@
   <label for="modelo"><i class="bi bi-cpu-fill me-2"></i>Modelo da IA</label>
 </div>
 
+<<<<<<< HEAD
 <div class="col-12 form-floating">
   <textarea name="comportamento" id="comportamento" class="form-control" required>{{ grupo.comportamento }}</textarea>
   <label for="comportamento"><i class="bi bi-chat-text-fill me-2"></i>Comportamento da IA</label>
@@ -80,6 +81,24 @@
   <label for="chave"><i class="bi bi-key-fill me-2"></i>Chave OpenAI</label>
 </div>
 
+=======
+<div class="col-12">
+  <label for="comportamento" class="form-label">
+    <i class="bi bi-chat-text-fill me-2"></i>Comportamento da IA
+  </label>
+  <textarea name="comportamento" id="comportamento"
+            class="form-control" required>{{ grupo.comportamento }}</textarea>
+</div>
+
+
+<div class="col-12 form-floating">
+  <input type="password" name="openai_api_key" id="chave" class="form-control"
+         value="{{ grupo.openai_api_key }}" required autocomplete="new-password">
+  <label for="chave"><i class="bi bi-key-fill me-2"></i>Chave OpenAI</label>
+</div>
+
+
+>>>>>>> 90e442b (Novidade e melhorias)
 <div class="col-12 d-flex justify-content-between">
   <a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-circle"></i> Voltar</a>
   <button type="submit" class="btn btn-success shadow-sm"><i class="bi bi-save-fill"></i> Salvar</button>

@@ -55,3 +55,28 @@ CREATE TABLE integracoes_emby (
   user_id VARCHAR(100) NOT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+<<<<<<< HEAD
+=======
+
+
+
+-- --------------------------------------------------------
+-- Tabela: fontes_dados_externos
+-- --------------------------------------------------------
+ALTER TABLE grupos_config ENGINE=InnoDB;
+
+
+CREATE TABLE fontes_dados_externos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  grupo_id INT NOT NULL,
+  tipo VARCHAR(20) NOT NULL,
+  descricao VARCHAR(255) NOT NULL,
+  tabela VARCHAR(255) NOT NULL,
+  colunas TEXT NOT NULL,
+  instrucoes_ativacao TEXT,
+  conexao JSON NOT NULL,
+  habilitado TINYINT(1) DEFAULT 1,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (grupo_id) REFERENCES grupos_config(id) ON DELETE CASCADE
+);
+>>>>>>> 90e442b (Novidade e melhorias)

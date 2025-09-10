@@ -11,14 +11,28 @@
     "dotenv": "^16.5.0",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
+<<<<<<< HEAD
     "form-data": "^4.0.0",
     "moment": "^2.30.1",
     "mysql2": "^3.6.1",
+=======
+    "extenso": "^2.1.0",
+    "form-data": "^4.0.0",
+    "moment": "^2.30.1",
+    "mssql": "^11.0.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.6.1",
+    "pg": "^8.16.3",
+>>>>>>> 90e442b (Novidade e melhorias)
     "puppeteer": "^21.3.8",
     "qrcode-terminal": "^0.12.0",
     "serve-favicon": "^2.5.0",
     "twig": "^1.15.4",
+<<<<<<< HEAD
     "whatsapp-web.js": "^1.31.0"
+=======
+    "whatsapp-web.js": "^1.34.0"
+>>>>>>> 90e442b (Novidade e melhorias)
   },
   "engines": {
     "node": ">=18.0.0"
